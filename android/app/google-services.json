@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "1038796563377",
+    "project_id": "lokatist-63a74",
+    "storage_bucket": "lokatist-63a74.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1038796563377:android:8655d09851dbf7fcbc1390",
+        "android_client_info": {
+          "package_name": "com.batuhan.lokalist_proje"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDcGJ3c3zfSn4Vfd74VZeBS5HftdjBIw7A"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1038796563377:android:19c4faeca5027f45bc1390",
+        "android_client_info": {
+          "package_name": "com.batuhan.lokatist_proje"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDcGJ3c3zfSn4Vfd74VZeBS5HftdjBIw7A"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
