@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'auth_servisi.dart';
 import 'kullanici_servisi.dart';
+import 'mekan_servisi.dart';
 import 'home_page.dart';
 import 'giris_page.dart';
 
@@ -20,7 +21,10 @@ class _SplashScreenState extends State<SplashScreen> {
   }
 
   Future<void> _kontrol() async {
-    await Future.delayed(const Duration(seconds: 3));
+    await Future.wait([
+      MekanServisi.yukle(),
+      Future.delayed(const Duration(seconds: 2)),
+    ]);
     if (!mounted) return;
 
     final User? kullanici = AuthServisi.mevcutKullanici;

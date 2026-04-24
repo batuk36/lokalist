@@ -32,4 +32,8 @@ class AuthServisi {
   static Future<void> cikisYap() async {
     await _auth.signOut();
   }
+
+  static Future<void> sifreSifirla(String email) async {
+    await _auth.sendPasswordResetEmail(email: email.trim());
+  }
 }

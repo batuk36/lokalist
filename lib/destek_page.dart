@@ -1,48 +1,201 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'tema_yonetici.dart';
 
-class DestekPage extends StatelessWidget {
+class DestekPage extends StatefulWidget {
   const DestekPage({super.key});
 
   @override
+  State<DestekPage> createState() => _DestekPageState();
+}
+
+class _DestekPageState extends State<DestekPage> {
+  Future<void> _hataBildirimiGoster(bool dark) async {
+    final controller = TextEditingController();
+    final formKey = GlobalKey<FormState>();
+    bool gonderiliyor = false;
+
+    final textColor = dark ? Colors.white : Colors.black87;
+    final bgColor = dark ? const Color(0xFF1A1A1A) : Colors.white;
+
+    await showDialog(
+      context: context,
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setDialog) => AlertDialog(
+          backgroundColor: bgColor,
+          title: Row(
+            children: [
+              const Icon(Icons.bug_report, color: Colors.redAccent, size: 22),
+              const SizedBox(width: 8),
+              Text('Hata Bildir', style: TextStyle(color: textColor, fontSize: 18)),
+            ],
+          ),
+          content: Form(
+            key: formKey,
+            child: TextFormField(
+              controller: controller,
+              maxLines: 5,
+              style: TextStyle(color: textColor),
+              decoration: InputDecoration(
+                hintText: 'Karşılaştığınız sorunu açıklayın...',
+                hintStyle: TextStyle(color: dark ? Colors.white38 : Colors.black38),
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10),
+                  borderSide: BorderSide(color: dark ? Colors.white24 : Colors.black26),
+                ),
+              ),
+              validator: (v) => (v == null || v.trim().isEmpty) ? 'Lütfen bir açıklama girin' : null,
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx),
+              child: Text('İptal', style: TextStyle(color: dark ? Colors.white54 : Colors.black54)),
+            ),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF0056b3),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+              ),
+              onPressed: gonderiliyor
+                  ? null
+                  : () async {
+                      if (!formKey.currentState!.validate()) return;
+                      setDialog(() => gonderiliyor = true);
+                      try {
+                        await FirebaseFirestore.instance
+                            .collection('hata_bildirimleri')
+                            .add({
+                          'mesaj': controller.text.trim(),
+                          'tarih': FieldValue.serverTimestamp(),
+                          'kullanici_email': FirebaseAuth.instance.currentUser?.email ?? 'Anonim',
+                          'kullanici_id': FirebaseAuth.instance.currentUser?.uid ?? '',
+                        });
+                        if (ctx.mounted) Navigator.pop(ctx);
+                        if (mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('Geri bildiriminiz iletildi, teşekkürler!'),
+                              backgroundColor: Color(0xFF0056b3),
+                            ),
+                          );
+                        }
+                      } catch (_) {
+                        setDialog(() => gonderiliyor = false);
+                        if (mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('Gönderilemedi, lütfen tekrar deneyin.'),
+                              backgroundColor: Colors.redAccent,
+                            ),
+                          );
+                        }
+                      }
+                    },
+              child: gonderiliyor
+                  ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
+                  : const Text('Gönder', style: TextStyle(color: Colors.white)),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final bool dark = context.watch<TemaYonetici>().karanlikMod;
+    final bgColor = dark ? const Color(0xFF0A0A0A) : Colors.white;
+    final textColor = dark ? Colors.white : Colors.black87;
+    final subtextColor = dark ? Colors.white54 : Colors.black54;
+    const midnightBlue = Color(0xFF0056b3);
+
     return Scaffold(
-      backgroundColor: const Color(0xFF0A0A0A),
+      backgroundColor: bgColor,
       appBar: AppBar(
-        title: const Text('Destek ve Yardım'),
+        title: Text('Destek ve Yardım', style: TextStyle(color: textColor)),
         backgroundColor: Colors.transparent,
         elevation: 0,
+        iconTheme: IconThemeData(color: textColor),
       ),
       body: ListView(
         padding: const EdgeInsets.all(20),
         children: [
-          const Text('Sık Sorulan Sorular',
-              style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold)),
+          Text(
+            'Sık Sorulan Sorular',
+            style: TextStyle(color: textColor, fontSize: 20, fontWeight: FontWeight.bold),
+          ),
           const SizedBox(height: 15),
-          _sss('Uygulama nasıl kullanılır?',
-              'Ana sayfadan mekanları keşfedebilir, favorilerine ekleyebilirsin.'),
-          _sss('Mekan ekleyebilir miyim?',
-              'Şu an için mekan ekleme özelliği geliştirme aşamasındadır.'),
+          _sss(
+            soru: 'Uygulama nasıl kullanılır?',
+            cevap: 'Ana sayfadan mekanları keşfedebilir, favorilerine ekleyebilirsin. Sol menüden cafeler veya restoranlara göre filtreleme yapabilirsin.',
+            dark: dark,
+            textColor: textColor,
+            subtextColor: subtextColor,
+            onSoruIkonu: const Icon(Icons.help, color: Colors.redAccent, size: 20),
+          ),
+          _sss(
+            soru: 'Mekan ekleyebilir miyim?',
+            cevap: 'Favorilere basarak mekanları kendi listenize ekleyebilirsiniz.',
+            dark: dark,
+            textColor: textColor,
+            subtextColor: subtextColor,
+            onSoruIkonu: const Icon(Icons.add_location_alt, color: midnightBlue, size: 20),
+          ),
           const SizedBox(height: 30),
-          const Text('İletişim',
-              style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold)),
+          Text(
+            'İletişim',
+            style: TextStyle(color: textColor, fontSize: 20, fontWeight: FontWeight.bold),
+          ),
           const SizedBox(height: 10),
           ListTile(
-            leading: const Icon(Icons.email, color: Color(0xFF0056b3)),
-            title: const Text('destek@lokatist.com',
-                style: TextStyle(color: Colors.white54)),
+            leading: const Icon(Icons.email, color: midnightBlue),
+            title: Text('destek@lokatist.com', style: TextStyle(color: subtextColor)),
+          ),
+          const SizedBox(height: 8),
+          SizedBox(
+            width: double.infinity,
+            child: OutlinedButton.icon(
+              onPressed: () => _hataBildirimiGoster(dark),
+              icon: const Icon(Icons.bug_report, color: Colors.redAccent),
+              label: const Text(
+                'Hata Bildir',
+                style: TextStyle(color: Colors.redAccent, fontSize: 16, fontWeight: FontWeight.bold),
+              ),
+              style: OutlinedButton.styleFrom(
+                padding: const EdgeInsets.symmetric(vertical: 14),
+                side: const BorderSide(color: Colors.redAccent),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              ),
+            ),
           ),
         ],
       ),
     );
   }
 
-  Widget _sss(String soru, String cevap) {
+  Widget _sss({
+    required String soru,
+    required String cevap,
+    required bool dark,
+    required Color textColor,
+    required Color subtextColor,
+    required Widget onSoruIkonu,
+  }) {
     return ExpansionTile(
-      title: Text(soru, style: const TextStyle(color: Colors.white)),
-      children: [Padding(
-        padding: const EdgeInsets.all(15),
-        child: Text(cevap, style: const TextStyle(color: Colors.white54)),
-      )],
+      leading: onSoruIkonu,
+      title: Text(soru, style: TextStyle(color: textColor, fontWeight: FontWeight.w600)),
+      iconColor: textColor,
+      collapsedIconColor: subtextColor,
+      children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+          child: Text(cevap, style: TextStyle(color: subtextColor)),
+        ),
+      ],
     );
   }
 }

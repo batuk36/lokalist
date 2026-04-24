@@ -47,6 +47,59 @@ class _GirisPageState extends State<GirisPage> {
     }
   }
 
+  Future<void> _sifremiUnuttum() async {
+    final controller = TextEditingController(text: _emailController.text);
+    final sonuc = await showDialog<String>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: const Color(0xFF1A1A1A),
+        title: const Text('Şifremi Unuttum', style: TextStyle(color: Colors.white)),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text('E-posta adresinize şifre sıfırlama bağlantısı göndereceğiz.', style: TextStyle(color: Colors.white54, fontSize: 13)),
+            const SizedBox(height: 16),
+            TextField(
+              controller: controller,
+              keyboardType: TextInputType.emailAddress,
+              style: const TextStyle(color: Colors.white),
+              decoration: InputDecoration(
+                hintText: 'E-posta',
+                hintStyle: const TextStyle(color: Colors.white38),
+                prefixIcon: const Icon(Icons.email_outlined, color: Color(0xFF0056b3), size: 20),
+                filled: true,
+                fillColor: const Color(0xFF161616),
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('İptal', style: TextStyle(color: Colors.white38))),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF0056b3), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8))),
+            onPressed: () => Navigator.pop(ctx, controller.text.trim()),
+            child: const Text('Gönder', style: TextStyle(color: Colors.white)),
+          ),
+        ],
+      ),
+    );
+
+    if (sonuc == null || sonuc.isEmpty) return;
+    try {
+      await AuthServisi.sifreSifirla(sonuc);
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Şifre sıfırlama bağlantısı gönderildi!'), backgroundColor: Color(0xFF0056b3)),
+      );
+    } catch (_) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Gönderilemedi. E-postayı kontrol edin.'), backgroundColor: Colors.redAccent),
+      );
+    }
+  }
+
   String _hataMetni(String hata) {
     if (hata.contains('user-not-found')) return 'Bu e-posta ile hesap bulunamadı.';
     if (hata.contains('wrong-password')) return 'Şifre yanlış.';
@@ -144,7 +197,19 @@ class _GirisPageState extends State<GirisPage> {
                       return null;
                     },
                   ),
-                  const SizedBox(height: 28),
+                  const SizedBox(height: 8),
+                  // Şifremi Unuttum
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: TextButton(
+                      onPressed: _sifremiUnuttum,
+                      child: const Text(
+                        'Şifremi Unuttum',
+                        style: TextStyle(color: Color(0xFF0056b3), fontSize: 13),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
                   // Giriş Butonu
                   SizedBox(
                     width: double.infinity,
@@ -197,6 +262,18 @@ class _GirisPageState extends State<GirisPage> {
                         ),
                       ),
                     ],
+                  ),
+                  const SizedBox(height: 16),
+                  // Misafir olarak devam
+                  TextButton(
+                    onPressed: () => Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(builder: (_) => const HomePage()),
+                    ),
+                    child: const Text(
+                      'Misafir Olarak Devam Et',
+                      style: TextStyle(color: Colors.white38, fontSize: 14),
+                    ),
                   ),
                   const SizedBox(height: 20),
                 ],
