@@ -5,6 +5,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'tema_yonetici.dart';
+import 'giris_gerekli.dart';
 
 // web3forms.com → e-postanı gir → gelen maildeki linke tıkla → key'i buraya yapıştır
 const String _web3formsKey = '669ac10d-5ac9-49da-bb37-4048ba708e2f';
@@ -180,7 +181,13 @@ class _DestekPageState extends State<DestekPage> {
           SizedBox(
             width: double.infinity,
             child: OutlinedButton.icon(
-              onPressed: () => _hataBildirimiGoster(dark),
+              onPressed: () {
+                if (FirebaseAuth.instance.currentUser == null) {
+                  girisGerekliGoster(context);
+                } else {
+                  _hataBildirimiGoster(dark);
+                }
+              },
               icon: const Icon(Icons.bug_report, color: Colors.redAccent),
               label: const Text(
                 'Hata Bildir',

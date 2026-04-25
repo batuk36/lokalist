@@ -7,6 +7,7 @@ import 'package:provider/provider.dart';
 import 'models.dart';
 import 'kullanici_servisi.dart';
 import 'tema_yonetici.dart';
+import 'giris_gerekli.dart';
 
 class DetailPage extends StatefulWidget {
   final Mekan mekan;
@@ -198,6 +199,10 @@ class _DetailPageState extends State<DetailPage> {
   }
 
   Future<void> _haritaAc() async {
+    if (FirebaseAuth.instance.currentUser == null) {
+      girisGerekliGoster(context);
+      return;
+    }
     final Uri url = Uri.parse(
       'https://www.google.com/maps/dir/?api=1'
       '&destination=${widget.mekan.enlem},${widget.mekan.boylam}'
@@ -245,9 +250,7 @@ class _DetailPageState extends State<DetailPage> {
                     onPressed: () async {
                       final uid = FirebaseAuth.instance.currentUser?.uid;
                       if (uid == null) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('Favorilere eklemek için giriş yapmanız gerekiyor.'), backgroundColor: Colors.redAccent),
-                        );
+                        girisGerekliGoster(context);
                         return;
                       }
                       setState(() => widget.mekan.isFavorite = !widget.mekan.isFavorite);

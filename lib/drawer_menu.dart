@@ -4,6 +4,7 @@ import 'auth_servisi.dart';
 import 'business_package_page.dart';
 import 'destek_page.dart';
 import 'giris_page.dart';
+import 'giris_gerekli.dart';
 
 class YanMenu extends StatelessWidget {
   final Function(String) onKategoriSec;
@@ -71,7 +72,11 @@ class YanMenu extends StatelessWidget {
               title: const Text('Favoriler', style: TextStyle(fontSize: 22)),
               onTap: () {
                 Navigator.pop(context);
-                onKategoriSec('Favoriler');
+                if (FirebaseAuth.instance.currentUser == null) {
+                  girisGerekliGoster(context);
+                } else {
+                  onKategoriSec('Favoriler');
+                }
               },
             ),
             ListTile(
