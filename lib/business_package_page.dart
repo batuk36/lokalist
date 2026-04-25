@@ -6,7 +6,7 @@ import 'tema_yonetici.dart';
 import 'giris_gerekli.dart';
 
 // !! Kendi WhatsApp numaranızı buraya girin (90 ile başlayan, boşuksuz)
-const String _wpNumara = '905XXXXXXXXXX';
+const String _wpNumara = '905457338305';
 
 class BusinessPackagePage extends StatefulWidget {
   const BusinessPackagePage({super.key});

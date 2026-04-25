@@ -175,7 +175,7 @@ class _DestekPageState extends State<DestekPage> {
           const SizedBox(height: 10),
           ListTile(
             leading: const Icon(Icons.email, color: midnightBlue),
-            title: Text('destek@lokatist.com', style: TextStyle(color: subtextColor)),
+            title: Text('desteklokalist@gmail.com', style: TextStyle(color: subtextColor)),
           ),
           const SizedBox(height: 8),
           SizedBox(
