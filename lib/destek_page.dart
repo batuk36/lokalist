@@ -2,7 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 import 'tema_yonetici.dart';
+
+// web3forms.com → e-postanı gir → gelen maildeki linke tıkla → key'i buraya yapıştır
+const String _web3formsKey = 'BURAYA_KEY_YAPISTIR';
 
 class DestekPage extends StatefulWidget {
   const DestekPage({super.key});
@@ -66,14 +71,30 @@ class _DestekPageState extends State<DestekPage> {
                       if (!formKey.currentState!.validate()) return;
                       setDialog(() => gonderiliyor = true);
                       try {
+                        final kullaniciEmail = FirebaseAuth.instance.currentUser?.email ?? 'Anonim';
+                        final mesaj = controller.text.trim();
+
                         await FirebaseFirestore.instance
                             .collection('hata_bildirimleri')
                             .add({
-                          'mesaj': controller.text.trim(),
+                          'mesaj': mesaj,
                           'tarih': FieldValue.serverTimestamp(),
-                          'kullanici_email': FirebaseAuth.instance.currentUser?.email ?? 'Anonim',
+                          'kullanici_email': kullaniciEmail,
                           'kullanici_id': FirebaseAuth.instance.currentUser?.uid ?? '',
                         });
+
+                        http.post(
+                          Uri.parse('https://api.web3forms.com/submit'),
+                          headers: {'Content-Type': 'application/json', 'Accept': 'application/json'},
+                          body: jsonEncode({
+                            'access_key': _web3formsKey,
+                            'subject': 'Lokatist - Yeni Hata Bildirimi',
+                            'from_name': 'Lokatist App',
+                            'email': kullaniciEmail,
+                            'message': mesaj,
+                          }),
+                        );
+
                         if (ctx.mounted) Navigator.pop(ctx);
                         if (mounted) {
                           ScaffoldMessenger.of(context).showSnackBar(
