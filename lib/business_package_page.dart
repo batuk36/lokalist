@@ -355,8 +355,8 @@ class _BusinessPackagePageState extends State<BusinessPackagePage> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Icon(
-            o.aktif ? Icons.check_circle_rounded : Icons.cancel_rounded,
-            color: o.aktif ? vurguRenk : Colors.grey.shade400,
+            Icons.check_circle_rounded,
+            color: o.aktif ? vurguRenk : Colors.grey.shade300,
             size: 19,
           ),
           const SizedBox(width: 10),
