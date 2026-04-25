@@ -88,7 +88,7 @@ class KvkkPage extends StatelessWidget {
           _bolum(
             'İletişim',
             'Gizlilik politikamıza ilişkin sorularınız için:\n\n'
-                'E-posta: desteklokalist@gmail.com\n\n'
+                'E-posta: desteklokatist@gmail.com\n\n'
                 'Talebiniz en geç 30 gün içinde yanıtlanacaktır.',
             surfaceColor,
             textColor,
