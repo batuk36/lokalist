@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'dart:async';
 import 'dart:math';
 import 'package:geolocator/geolocator.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -26,6 +27,9 @@ class _HomePageState extends State<HomePage> {
   final Color midnightBlue = const Color(0xFF0056b3);
   Position? kullaniciKonumu;
 
+  List<Mekan> _mekanlar = [];
+  StreamSubscription<List<Mekan>>? _mekanSubscription;
+
   final TextEditingController aramaController = TextEditingController();
   final FocusNode _aramaFocusu = FocusNode();
   String aramaKelimesi = "";
@@ -41,7 +45,7 @@ class _HomePageState extends State<HomePage> {
       _secilenFiyatlar.isNotEmpty || _minPuan > 0 || _maxMesafe > 0;
 
   List<Mekan> get gosterilenMekanlar {
-    var liste = List<Mekan>.from(MekanServisi.mekanlar);
+    var liste = List<Mekan>.from(_mekanlar);
 
     if (mevcutKategori == 'Favoriler') {
       liste = liste.where((m) => m.isFavorite).toList();
@@ -77,6 +81,10 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
+    _mekanlar = List.from(MekanServisi.mekanlar);
+    _mekanSubscription = MekanServisi.stream.listen((mekanlar) {
+      if (mounted) setState(() => _mekanlar = mekanlar);
+    });
     _konumAl();
     _aramaGecmisiYukle();
     _aramaFocusu.addListener(() {
@@ -86,6 +94,7 @@ class _HomePageState extends State<HomePage> {
 
   @override
   void dispose() {
+    _mekanSubscription?.cancel();
     aramaController.dispose();
     _aramaFocusu.dispose();
     super.dispose();
@@ -138,7 +147,7 @@ class _HomePageState extends State<HomePage> {
   }
 
   List<Mekan> _enYakinMekanlar() {
-    var kaynak = List<Mekan>.from(MekanServisi.mekanlar);
+    var kaynak = List<Mekan>.from(_mekanlar);
     if (mevcutKategori == 'Favoriler') {
       kaynak = kaynak.where((m) => m.isFavorite).toList();
     } else if (mevcutKategori != 'Hepsi') {
@@ -331,7 +340,8 @@ class _HomePageState extends State<HomePage> {
         onProfilTikla: () => _profilGoster(dark),
         onAyarlarTikla: () { Navigator.pop(context); Navigator.push(context, MaterialPageRoute(builder: (_) => const AyarlarPage())); },
         onRastgeleSec: () {
-          final mekanlar = MekanServisi.mekanlar;
+          final mekanlar = _mekanlar;
+          if (mekanlar.isEmpty) return;
           final m = mekanlar[Random().nextInt(mekanlar.length)];
           Navigator.push(context, MaterialPageRoute(builder: (_) => DetailPage(mekan: m)))
               .then((_) { if (mounted) setState(() {}); });

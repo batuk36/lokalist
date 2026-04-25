@@ -1,9 +1,10 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'models.dart';
-import 'mekan_servisi.dart';
 
 class KullaniciServisi {
   static final _db = FirebaseFirestore.instance;
+  static Set<String> _favoriler = {};
+
+  static Set<String> get cachedFavoriler => _favoriler;
 
   static Future<List<String>> favorileriGetir(String uid) async {
     final doc = await _db.collection('users').doc(uid).get();
@@ -13,6 +14,11 @@ class KullaniciServisi {
 
   static Future<void> favoriGuncelle(
       String uid, String mekanIsmi, bool ekle) async {
+    if (ekle) {
+      _favoriler.add(mekanIsmi);
+    } else {
+      _favoriler.remove(mekanIsmi);
+    }
     final ref = _db.collection('users').doc(uid);
     if (ekle) {
       await ref.update({
@@ -25,7 +31,8 @@ class KullaniciServisi {
     }
   }
 
-  static Future<void> puanKaydet(String uid, String mekanIsmi, int puan) async {
+  static Future<void> puanKaydet(
+      String uid, String mekanIsmi, int puan) async {
     final ref = _db.collection('users').doc(uid);
     await ref.set({'ratings': {mekanIsmi: puan}}, SetOptions(merge: true));
   }
@@ -39,8 +46,6 @@ class KullaniciServisi {
 
   static Future<void> favorileriUygula(String uid) async {
     final favoriler = await favorileriGetir(uid);
-    for (final mekan in MekanServisi.mekanlar) {
-      mekan.isFavorite = favoriler.contains(mekan.isim);
-    }
+    _favoriler = Set.from(favoriler);
   }
 }

@@ -30,6 +30,10 @@ class _SplashScreenState extends State<SplashScreen> {
     final User? kullanici = AuthServisi.mevcutKullanici;
     if (kullanici != null) {
       await KullaniciServisi.favorileriUygula(kullanici.uid);
+      final favoriler = KullaniciServisi.cachedFavoriler;
+      for (final m in MekanServisi.mekanlar) {
+        m.isFavorite = favoriler.contains(m.isim);
+      }
       if (!mounted) return;
       Navigator.pushReplacement(
         context,

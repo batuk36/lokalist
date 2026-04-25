@@ -26,6 +26,20 @@ class Mekan {
     this.fiyatSeviyesi = 2,
     this.isFavorite = false,
   });
+
+  Map<String, dynamic> toMap() => {
+    'isim': isim,
+    'tur': tur,
+    'adres': adres,
+    'resim': resim,
+    'kategori': kategori,
+    'telefon': telefon,
+    'puan': puan,
+    'acilisSaati': acilisSaati,
+    'enlem': enlem,
+    'boylam': boylam,
+    'fiyatSeviyesi': fiyatSeviyesi,
+  };
 }
 
 List<Mekan> tumMekanlarListesi = [
