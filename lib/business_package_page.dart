@@ -28,7 +28,7 @@ class _BusinessPackagePageState extends State<BusinessPackagePage> {
       ozellikler: [
         _Ozellik('Temel listeleme (isim, adres, telefon)', true),
         _Ozellik('Arama sonuçlarında görünme', true),
-        _Ozellik('Fotoğraf yükleme', false),
+        _Ozellik('Fotoğraf yükleme', true),
         _Ozellik('Sosyal medya & web sitesi linkleri', false),
         _Ozellik('Menü ekleme', false),
         _Ozellik('Analiz ve raporlar', false),
@@ -355,8 +355,8 @@ class _BusinessPackagePageState extends State<BusinessPackagePage> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Icon(
-            Icons.check_circle_rounded,
-            color: o.aktif ? vurguRenk : Colors.grey.shade300,
+            o.aktif ? Icons.check_circle_rounded : Icons.cancel_rounded,
+            color: o.aktif ? vurguRenk : Colors.grey.shade400,
             size: 19,
           ),
           const SizedBox(width: 10),
