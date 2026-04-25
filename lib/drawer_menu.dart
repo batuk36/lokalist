@@ -107,7 +107,11 @@ class YanMenu extends StatelessWidget {
                       fontSize: 22, fontWeight: FontWeight.bold)),
               onTap: () {
                 Navigator.pop(context);
-                onRastgeleSec();
+                if (FirebaseAuth.instance.currentUser == null) {
+                  girisGerekliGoster(context);
+                } else {
+                  onRastgeleSec();
+                }
               },
             ),
             const Spacer(),
