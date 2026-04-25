@@ -49,3 +49,7 @@ app.*.map.json
 
 # Android build reports
 android/build/
+
+# Keystore - şifreler GitHub'a gitmesin
+android/key.properties
+android/app/lokalist.jks
