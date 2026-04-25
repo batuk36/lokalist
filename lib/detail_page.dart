@@ -218,6 +218,10 @@ class _DetailPageState extends State<DetailPage> {
   }
 
   Future<void> _ara() async {
+    if (FirebaseAuth.instance.currentUser == null) {
+      girisGerekliGoster(context);
+      return;
+    }
     final Uri tel = Uri.parse('tel:${widget.mekan.telefon}');
     if (!await launchUrl(tel)) {
       if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Arama yapılamadı')));
