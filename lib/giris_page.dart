@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'auth_servisi.dart';
 import 'kayit_page.dart';
 import 'home_page.dart';
+import 'kullanici_servisi.dart';
+import 'mekan_servisi.dart';
 
 class GirisPage extends StatefulWidget {
   const GirisPage({super.key});
@@ -29,6 +31,14 @@ class _GirisPageState extends State<GirisPage> {
     setState(() => _yukleniyor = true);
     try {
       await AuthServisi.girisYap(_emailController.text, _sifreController.text);
+      final uid = AuthServisi.mevcutKullanici?.uid;
+      if (uid != null) {
+        await KullaniciServisi.favorileriUygula(uid);
+        final favoriler = KullaniciServisi.cachedFavoriler;
+        for (final m in MekanServisi.mekanlar) {
+          m.isFavorite = favoriler.contains(m.isim);
+        }
+      }
       if (!mounted) return;
       Navigator.pushReplacement(
         context,
