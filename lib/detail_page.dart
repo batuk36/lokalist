@@ -54,6 +54,10 @@ class _DetailPageState extends State<DetailPage> {
       'https://maps.google.com/?q=${widget.mekan.enlem},${widget.mekan.boylam}';
 
   void _sosyalMedyaPaylasimGoster() {
+    if (FirebaseAuth.instance.currentUser == null) {
+      girisGerekliGoster(context);
+      return;
+    }
     showModalBottomSheet(
       context: context,
       backgroundColor: const Color(0xFF161616),

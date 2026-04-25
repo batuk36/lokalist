@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'tema_yonetici.dart';
+import 'giris_gerekli.dart';
 
 // !! Kendi WhatsApp numaranızı buraya girin (90 ile başlayan, boşuksuz)
 const String _wpNumara = '905XXXXXXXXXX';
@@ -73,6 +75,10 @@ class _BusinessPackagePageState extends State<BusinessPackagePage> {
   ];
 
   Future<void> _wpAc() async {
+    if (FirebaseAuth.instance.currentUser == null) {
+      girisGerekliGoster(context);
+      return;
+    }
     final paket = _paketler[_secilenPaket];
     final mesaj =
         'Merhaba! 👋\n\n'

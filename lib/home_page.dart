@@ -15,6 +15,7 @@ import 'giris_page.dart';
 import 'profil_page.dart';
 import 'tema_yonetici.dart';
 import 'arama_gecmisi_servisi.dart';
+import 'giris_gerekli.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -389,6 +390,12 @@ class _HomePageState extends State<HomePage> {
                 child: TextField(
                   controller: aramaController,
                   focusNode: _aramaFocusu,
+                  readOnly: FirebaseAuth.instance.currentUser == null,
+                  onTap: () {
+                    if (FirebaseAuth.instance.currentUser == null) {
+                      girisGerekliGoster(context);
+                    }
+                  },
                   onChanged: _aramaYap,
                   onSubmitted: _aramaGonderildi,
                   style: TextStyle(color: textColor),
