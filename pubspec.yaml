@@ -1,7 +1,7 @@
 name: lokalist_proje
 description: "Mekan keşif uygulaması Lokatist"
 publish_to: 'none'
-version: 1.0.0+1
+version: 1.0.1+4
 
 environment:
   sdk: '>=3.2.3 <4.0.0'
