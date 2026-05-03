@@ -28,10 +28,23 @@ workflows:
         script: keychain add-certificates
       - name: Set up Xcode code signing
         script: xcode-project use-profiles
-      - name: Build iOS IPA
+      - name: Build Flutter iOS
+        script: flutter build ios --release --no-codesign
+      - name: Archive
         script: |
-          flutter build ipa --release \
-            --export-options-plist=/Users/builder/export_options.plist
+          xcodebuild archive \
+            -workspace ios/Runner.xcworkspace \
+            -scheme Runner \
+            -configuration Release \
+            -archivePath /tmp/Runner.xcarchive \
+            CODE_SIGN_STYLE=Manual \
+            CODE_SIGN_IDENTITY="Apple Distribution"
+      - name: Export IPA
+        script: |
+          xcodebuild -exportArchive \
+            -archivePath /tmp/Runner.xcarchive \
+            -exportOptionsPlist /Users/builder/export_options.plist \
+            -exportPath build/ios/ipa
     artifacts:
       - build/ios/ipa/*.ipa
       - /tmp/xcodebuild_logs/*.log
