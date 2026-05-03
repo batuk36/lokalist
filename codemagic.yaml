@@ -11,8 +11,9 @@ workflows:
     scripts:
       - name: Set up keychain
         script: keychain initialize
-      - name: Fetch signing files
+      - name: Generate private key and fetch signing files
         script: |
+          export CERTIFICATE_PRIVATE_KEY=$(openssl genrsa 2048)
           app-store-connect fetch-signing-files com.lokatist.app \
             --type IOS_APP_STORE \
             --create
