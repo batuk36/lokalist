@@ -13,6 +13,10 @@ workflows:
     scripts:
       - name: Set up keychain
         script: keychain initialize
+      - name: Get Flutter packages
+        script: flutter packages pub get
+      - name: Install CocoaPods
+        script: find . -name "Podfile" -execdir pod install \;
       - name: Fetch signing files
         script: |
           openssl genrsa -traditional 2048 > /tmp/cert_key.pem 2>/dev/null
@@ -24,17 +28,10 @@ workflows:
         script: keychain add-certificates
       - name: Set up Xcode code signing
         script: xcode-project use-profiles
-      - name: Get Flutter packages
-        script: flutter packages pub get
-      - name: Install CocoaPods
-        script: find . -name "Podfile" -execdir pod install \;
-      - name: Build Flutter iOS (no codesign)
-        script: flutter build ios --release --no-codesign
-      - name: Archive and export IPA
+      - name: Build iOS IPA
         script: |
-          xcode-project build-ipa \
-            --workspace "ios/Runner.xcworkspace" \
-            --scheme "Runner"
+          flutter build ipa --release \
+            --export-options-plist=/Users/builder/export_options.plist
     artifacts:
       - build/ios/ipa/*.ipa
       - /tmp/xcodebuild_logs/*.log
