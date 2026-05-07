@@ -32,7 +32,7 @@ workflows:
       - name: Set up Xcode code signing
         script: xcode-project use-profiles
       - name: Build Flutter iOS
-        script: flutter build ios --release --no-codesign
+        script: flutter build ios --release --no-codesign --build-number=$BUILD_NUMBER
       - name: Archive and export IPA
         script: |
           xcodebuild archive \
@@ -42,7 +42,8 @@ workflows:
             -archivePath /tmp/Runner.xcarchive \
             DEVELOPMENT_TEAM=U7RU7FT9JV \
             CODE_SIGN_STYLE=Manual \
-            CODE_SIGN_IDENTITY="Apple Distribution"
+            CODE_SIGN_IDENTITY="Apple Distribution" \
+            CURRENT_PROJECT_VERSION=$BUILD_NUMBER
           xcodebuild -exportArchive \
             -archivePath /tmp/Runner.xcarchive \
             -exportOptionsPlist /Users/builder/export_options.plist \
