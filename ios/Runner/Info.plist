@@ -51,6 +51,8 @@
 	<string>Yakınındaki mekanları gösterebilmek için konumuna ihtiyacımız var.</string>
 	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
 	<string>Yakınındaki mekanları gösterebilmek için konumuna ihtiyacımız var.</string>
+	<key>ITSAppUsesNonExemptEncryption</key>
+	<false/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
 	<key>UILaunchStoryboardName</key>
