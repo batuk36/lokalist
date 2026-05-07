@@ -19,7 +19,10 @@ workflows:
         script: find . -name "Podfile" -execdir pod install \;
       - name: Fetch signing files
         script: |
-          echo "$CERT_PRIVATE_KEY" > /tmp/cert_key.pem
+          app-store-connect certificates list --type DISTRIBUTION --json \
+            | python3 -c "import sys,json; [print(c['id']) for c in json.load(sys.stdin)['data']]" \
+            | xargs -I{} app-store-connect certificates revoke {} || true
+          openssl genrsa -traditional 2048 > /tmp/cert_key.pem 2>/dev/null
           app-store-connect fetch-signing-files com.lokatist.app \
             --type IOS_APP_STORE \
             --create \
