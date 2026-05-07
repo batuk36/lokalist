@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -80,10 +81,13 @@ class _BusinessPackagePageState extends State<BusinessPackagePage> {
       return;
     }
     final paket = _paketler[_secilenPaket];
-    final mesaj =
-        'Merhaba! 👋\n\n'
-        'Lokatist uygulamasından "${paket.isim} Paket" (${paket.fiyat}${paket.periyot != null ? ' ${paket.periyot}' : ''}) almak istiyorum.\n\n'
-        'Ödeme bilgilerini (IBAN vb.) paylaşabilir misiniz?';
+    final mesaj = Platform.isIOS
+        ? 'Merhaba! 👋\n\n'
+          'Lokatist uygulamasından "${paket.isim} Paket" hakkında bilgi almak istiyorum.\n\n'
+          'Bana detayları paylaşabilir misiniz?'
+        : 'Merhaba! 👋\n\n'
+          'Lokatist uygulamasından "${paket.isim} Paket" (${paket.fiyat}${paket.periyot != null ? ' ${paket.periyot}' : ''}) almak istiyorum.\n\n'
+          'Ödeme bilgilerini (IBAN vb.) paylaşabilir misiniz?';
     final url = Uri.parse(
         'https://wa.me/$_wpNumara?text=${Uri.encodeComponent(mesaj)}');
     if (!await launchUrl(url, mode: LaunchMode.externalApplication)) {
@@ -294,24 +298,25 @@ class _BusinessPackagePageState extends State<BusinessPackagePage> {
                       ],
                     ),
                   ),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      Text(
-                        paket.fiyat,
-                        style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 22,
-                            fontWeight: FontWeight.bold),
-                      ),
-                      if (paket.periyot != null)
+                  if (!Platform.isIOS)
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
                         Text(
-                          paket.periyot!,
+                          paket.fiyat,
                           style: const TextStyle(
-                              color: Colors.white70, fontSize: 12),
+                              color: Colors.white,
+                              fontSize: 22,
+                              fontWeight: FontWeight.bold),
                         ),
-                    ],
-                  ),
+                        if (paket.periyot != null)
+                          Text(
+                            paket.periyot!,
+                            style: const TextStyle(
+                                color: Colors.white70, fontSize: 12),
+                          ),
+                      ],
+                    ),
                 ],
               ),
             ),
@@ -401,7 +406,9 @@ class _BusinessPackagePageState extends State<BusinessPackagePage> {
           onPressed: _wpAc,
           icon: const Icon(Icons.chat_rounded, color: Colors.white, size: 22),
           label: Text(
-            'Hemen Yükselt  —  ${paket.isim} ${paket.fiyat}',
+            Platform.isIOS
+                ? 'Hemen Yükselt  —  ${paket.isim}'
+                : 'Hemen Yükselt  —  ${paket.isim} ${paket.fiyat}',
             style: const TextStyle(
                 color: Colors.white,
                 fontSize: 15,

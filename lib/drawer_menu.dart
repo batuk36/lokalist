@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:provider/provider.dart';
+import 'tema_yonetici.dart';
 import 'auth_servisi.dart';
 import 'business_package_page.dart';
 import 'destek_page.dart';
@@ -23,6 +25,12 @@ class YanMenu extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     const midnightBlue = Color(0xFF0056b3);
+    final bool dark = context.watch<TemaYonetici>().karanlikMod;
+    final bgColor = dark ? const Color(0xFF0A0A0A) : Colors.white;
+    final headerBgColor = dark ? const Color(0xFF121212) : midnightBlue;
+    final textColor = dark ? Colors.white : Colors.black87;
+    final dividerColor = dark ? Colors.white12 : Colors.black12;
+
     final kullanici = FirebaseAuth.instance.currentUser;
     final ad = kullanici?.displayName ?? 'Misafir';
     final email = kullanici?.email ?? '';
@@ -30,13 +38,13 @@ class YanMenu extends StatelessWidget {
 
     return Drawer(
       child: Container(
-        color: const Color(0xFF0A0A0A),
+        color: bgColor,
         child: Column(
           children: [
             GestureDetector(
               onTap: onProfilTikla,
               child: UserAccountsDrawerHeader(
-                decoration: const BoxDecoration(color: Color(0xFF121212)),
+                decoration: BoxDecoration(color: headerBgColor),
                 currentAccountPicture: CircleAvatar(
                   backgroundColor: midnightBlue,
                   child: Text(
@@ -60,7 +68,7 @@ class YanMenu extends StatelessWidget {
             ),
             ListTile(
               leading: const Icon(Icons.home, color: midnightBlue, size: 30),
-              title: const Text('Ana Sayfa', style: TextStyle(fontSize: 22)),
+              title: Text('Ana Sayfa', style: TextStyle(fontSize: 22, color: textColor)),
               onTap: () {
                 Navigator.pop(context);
                 onKategoriSec('Hepsi');
@@ -69,7 +77,7 @@ class YanMenu extends StatelessWidget {
             ListTile(
               leading: const Icon(Icons.favorite,
                   color: Colors.redAccent, size: 30),
-              title: const Text('Favoriler', style: TextStyle(fontSize: 22)),
+              title: Text('Favoriler', style: TextStyle(fontSize: 22, color: textColor)),
               onTap: () {
                 Navigator.pop(context);
                 if (FirebaseAuth.instance.currentUser == null) {
@@ -81,7 +89,7 @@ class YanMenu extends StatelessWidget {
             ),
             ListTile(
               leading: const Icon(Icons.coffee, color: midnightBlue, size: 30),
-              title: const Text('Cafeler', style: TextStyle(fontSize: 22)),
+              title: Text('Cafeler', style: TextStyle(fontSize: 22, color: textColor)),
               onTap: () {
                 Navigator.pop(context);
                 onKategoriSec('Cafe');
@@ -91,20 +99,19 @@ class YanMenu extends StatelessWidget {
             ListTile(
               leading:
                   const Icon(Icons.restaurant, color: midnightBlue, size: 30),
-              title:
-                  const Text('Restoranlar', style: TextStyle(fontSize: 22)),
+              title: Text('Restoranlar', style: TextStyle(fontSize: 22, color: textColor)),
               onTap: () {
                 Navigator.pop(context);
                 onKategoriSec('Restoran');
               },
             ),
-            const Divider(color: Colors.white12),
+            Divider(color: dividerColor),
             ListTile(
               leading: const Icon(Icons.auto_awesome,
                   color: Colors.amber, size: 30),
-              title: const Text('Beni Oraya Götür!',
+              title: Text('Beni Oraya Götür!',
                   style: TextStyle(
-                      fontSize: 22, fontWeight: FontWeight.bold)),
+                      fontSize: 22, fontWeight: FontWeight.bold, color: textColor)),
               onTap: () {
                 Navigator.pop(context);
                 if (FirebaseAuth.instance.currentUser == null) {
@@ -142,14 +149,14 @@ class YanMenu extends StatelessWidget {
             ListTile(
               leading:
                   const Icon(Icons.settings, color: Colors.grey, size: 30),
-              title: const Text('Ayarlar', style: TextStyle(fontSize: 22)),
+              title: Text('Ayarlar', style: TextStyle(fontSize: 22, color: textColor)),
               onTap: onAyarlarTikla,
             ),
             ListTile(
               leading: const Icon(Icons.contact_support,
                   color: midnightBlue, size: 30),
-              title: const Text('Destek ve Yardım',
-                  style: TextStyle(fontSize: 22)),
+              title: Text('Destek ve Yardım',
+                  style: TextStyle(fontSize: 22, color: textColor)),
               onTap: () {
                 Navigator.pop(context);
                 Navigator.push(

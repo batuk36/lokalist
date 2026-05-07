@@ -6,6 +6,8 @@ import 'tema_yonetici.dart';
 import 'auth_servisi.dart';
 import 'giris_page.dart';
 
+const _blue = Color(0xFF0056b3);
+
 class ProfilPage extends StatefulWidget {
   const ProfilPage({super.key});
 
@@ -93,19 +95,69 @@ class _ProfilPageState extends State<ProfilPage> {
   Future<void> _sifreDegistir() async {
     final email = _kullanici?.email;
     if (email == null) return;
+    final bool dark = context.read<TemaYonetici>().karanlikMod;
+
+    final onay = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: dark ? const Color(0xFF1A1A1A) : Colors.white,
+        title: Text('Şifre Sıfırlama',
+            style: TextStyle(color: dark ? Colors.white : Colors.black87)),
+        content: Text(
+          '$email adresine şifre sıfırlama bağlantısı gönderilecek.\n\nE-postayı almak için gelen kutunuzu ve spam klasörünüzü kontrol edin.',
+          style: TextStyle(color: dark ? Colors.white70 : Colors.black54),
+        ),
+        actions: [
+          TextButton(
+              onPressed: () => Navigator.pop(ctx, false),
+              child: Text('İptal',
+                  style: TextStyle(
+                      color: dark ? Colors.white38 : Colors.black38))),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+                backgroundColor: _blue,
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8))),
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text('Gönder',
+                style: TextStyle(color: Colors.white)),
+          ),
+        ],
+      ),
+    );
+
+    if (onay != true) return;
     try {
       await AuthServisi.sifreSifirla(email);
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text(
-              '$email adresine şifre sıfırlama bağlantısı gönderildi.'),
-          backgroundColor: const Color(0xFF0056b3),
-        ));
+        showDialog(
+          context: context,
+          builder: (ctx) => AlertDialog(
+            backgroundColor: dark ? const Color(0xFF1A1A1A) : Colors.white,
+            title: const Text('E-posta Gönderildi',
+                style: TextStyle(color: _blue)),
+            content: Text(
+              '$email adresine şifre sıfırlama bağlantısı gönderildi.\n\nSpam/gereksiz posta klasörünüzü de kontrol etmeyi unutmayın.',
+              style: TextStyle(color: dark ? Colors.white70 : Colors.black54),
+            ),
+            actions: [
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                    backgroundColor: _blue,
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8))),
+                onPressed: () => Navigator.pop(ctx),
+                child: const Text('Tamam',
+                    style: TextStyle(color: Colors.white)),
+              ),
+            ],
+          ),
+        );
       }
     } catch (_) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-            content: Text('Gönderilemedi. Tekrar deneyin.'),
+            content: Text('Gönderilemedi. İnternet bağlantınızı kontrol edin.'),
             backgroundColor: Colors.redAccent));
       }
     }
@@ -148,10 +200,97 @@ class _ProfilPageState extends State<ProfilPage> {
     setState(() => _yukleniyor = true);
     try {
       final uid = _kullanici!.uid;
-      await FirebaseFirestore.instance
-          .collection('users')
-          .doc(uid)
-          .delete();
+      await FirebaseFirestore.instance.collection('users').doc(uid).delete();
+      await _kullanici!.delete();
+      if (mounted) {
+        Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(builder: (_) => const GirisPage()),
+          (_) => false,
+        );
+      }
+    } on FirebaseAuthException catch (e) {
+      setState(() => _yukleniyor = false);
+      if (e.code == 'requires-recent-login' && mounted) {
+        await _yenidenGirisYapVeSil(dark);
+      } else if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text('Hata: ${e.message ?? 'Hesap silinemedi.'}'),
+          backgroundColor: Colors.redAccent,
+        ));
+      }
+    } catch (_) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+          content: Text('Hesap silinemedi. Tekrar deneyin.'),
+          backgroundColor: Colors.redAccent,
+        ));
+        setState(() => _yukleniyor = false);
+      }
+    }
+  }
+
+  Future<void> _yenidenGirisYapVeSil(bool dark) async {
+    final sifreController = TextEditingController();
+    final onay = await showDialog<String>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: dark ? const Color(0xFF1A1A1A) : Colors.white,
+        title: Text('Kimliğinizi Doğrulayın',
+            style: TextStyle(color: dark ? Colors.white : Colors.black87)),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              'Hesabı silmek için şifrenizi girin.',
+              style: TextStyle(color: dark ? Colors.white70 : Colors.black54),
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: sifreController,
+              obscureText: true,
+              autofocus: true,
+              style: TextStyle(color: dark ? Colors.white : Colors.black87),
+              decoration: InputDecoration(
+                hintText: 'Şifre',
+                hintStyle: TextStyle(
+                    color: dark ? Colors.white38 : Colors.black38),
+                filled: true,
+                fillColor: dark ? const Color(0xFF161616) : Colors.grey.shade100,
+                border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide.none),
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+              onPressed: () => Navigator.pop(ctx),
+              child: Text('İptal',
+                  style: TextStyle(
+                      color: dark ? Colors.white38 : Colors.black38))),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.redAccent,
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8))),
+            onPressed: () => Navigator.pop(ctx, sifreController.text),
+            child: const Text('Hesabı Sil',
+                style: TextStyle(color: Colors.white)),
+          ),
+        ],
+      ),
+    );
+
+    if (onay == null || onay.isEmpty) return;
+    setState(() => _yukleniyor = true);
+    try {
+      final credential = EmailAuthProvider.credential(
+          email: _kullanici!.email!, password: onay);
+      await _kullanici!.reauthenticateWithCredential(credential);
+      final uid = _kullanici!.uid;
+      await FirebaseFirestore.instance.collection('users').doc(uid).delete();
       await _kullanici!.delete();
       if (mounted) {
         Navigator.pushAndRemoveUntil(
@@ -163,8 +302,7 @@ class _ProfilPageState extends State<ProfilPage> {
     } catch (_) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-          content: Text(
-              'Hesap silinemedi. Tekrar giriş yapıp deneyin.'),
+          content: Text('Şifre yanlış veya işlem başarısız. Tekrar deneyin.'),
           backgroundColor: Colors.redAccent,
         ));
         setState(() => _yukleniyor = false);

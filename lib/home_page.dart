@@ -42,6 +42,10 @@ class _HomePageState extends State<HomePage> {
   double _minPuan = 0.0;
   int _maxMesafe = 0;
 
+  late PageController _oneCikanController;
+  Timer? _oneCikanTimer;
+  int _oneCikanSayfa = 0;
+
   bool get _filtreAktif =>
       _secilenFiyatlar.isNotEmpty || _minPuan > 0 || _maxMesafe > 0;
 
@@ -82,6 +86,11 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
+    _oneCikanController = PageController(viewportFraction: 0.85);
+    _oneCikanController.addListener(() {
+      final sayfa = _oneCikanController.page?.round() ?? 0;
+      if (sayfa != _oneCikanSayfa && mounted) setState(() => _oneCikanSayfa = sayfa);
+    });
     _mekanlar = List.from(MekanServisi.mekanlar);
     _mekanSubscription = MekanServisi.stream.listen((mekanlar) {
       if (mounted) setState(() => _mekanlar = mekanlar);
@@ -91,10 +100,30 @@ class _HomePageState extends State<HomePage> {
     _aramaFocusu.addListener(() {
       if (mounted) setState(() => _aramaAktif = _aramaFocusu.hasFocus);
     });
+    _oneCikanTimerBaslat();
+  }
+
+  void _oneCikanTimerBaslat() {
+    _oneCikanTimer?.cancel();
+    _oneCikanTimer = Timer.periodic(const Duration(seconds: 4), (_) {
+      if (!mounted) return;
+      final liste = gosterilenMekanlar;
+      final itemCount = liste.length > 5 ? 5 : liste.length;
+      if (itemCount < 2) return;
+      if (!_oneCikanController.hasClients) return;
+      final sonraki = (_oneCikanSayfa + 1) % itemCount;
+      _oneCikanController.animateToPage(
+        sonraki,
+        duration: const Duration(milliseconds: 600),
+        curve: Curves.easeInOut,
+      );
+    });
   }
 
   @override
   void dispose() {
+    _oneCikanTimer?.cancel();
+    _oneCikanController.dispose();
     _mekanSubscription?.cancel();
     aramaController.dispose();
     _aramaFocusu.dispose();
@@ -168,7 +197,12 @@ class _HomePageState extends State<HomePage> {
       mevcutKategori = kategori;
       aramaController.clear();
       aramaKelimesi = "";
+      _oneCikanSayfa = 0;
     });
+    if (_oneCikanController.hasClients) {
+      _oneCikanController.jumpToPage(0);
+    }
+    _oneCikanTimerBaslat();
   }
 
   void _filtreGoster(bool dark) {
@@ -459,11 +493,31 @@ class _HomePageState extends State<HomePage> {
                 SizedBox(
                   height: 350,
                   child: PageView.builder(
-                    controller: PageController(viewportFraction: 0.85),
+                    controller: _oneCikanController,
                     itemCount: liste.length > 5 ? 5 : liste.length,
                     itemBuilder: (_, i) => _premiumKart(liste[i]),
                   ),
                 ),
+                if ((liste.length > 1))
+                  Padding(
+                    padding: const EdgeInsets.only(top: 4, bottom: 4),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: List.generate(
+                        liste.length > 5 ? 5 : liste.length,
+                        (i) => AnimatedContainer(
+                          duration: const Duration(milliseconds: 300),
+                          margin: const EdgeInsets.symmetric(horizontal: 4),
+                          width: _oneCikanSayfa == i ? 20 : 8,
+                          height: 8,
+                          decoration: BoxDecoration(
+                            color: _oneCikanSayfa == i ? midnightBlue : (dark ? Colors.white24 : Colors.black26),
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
                 Padding(padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10), child: Text("Sana En Yakınlar", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: headingColor))),
                 Builder(builder: (_) {
                   final yakinlar = _enYakinMekanlar();
