@@ -75,28 +75,40 @@ class _BusinessPackagePageState extends State<BusinessPackagePage> {
     ),
   ];
 
-  Future<void> _wpAc() async {
+  Future<void> _iletisimAc() async {
     if (FirebaseAuth.instance.currentUser == null) {
       girisGerekliGoster(context);
       return;
     }
     final paket = _paketler[_secilenPaket];
-    final mesaj = Platform.isIOS
-        ? 'Merhaba! 👋\n\n'
-          'Lokatist uygulamasından "${paket.isim} Paket" hakkında bilgi almak istiyorum.\n\n'
-          'Bana detayları paylaşabilir misiniz?'
-        : 'Merhaba! 👋\n\n'
+    if (Platform.isIOS) {
+      final konu = Uri.encodeComponent('Lokatist Business - ${paket.isim} Paket Hakkında');
+      final govde = Uri.encodeComponent(
+        'Merhaba,\n\nLokatist uygulamasından "${paket.isim}" paketi hakkında bilgi almak istiyorum.\n\nTeşekkürler.',
+      );
+      final url = Uri.parse('mailto:desteklokatist@gmail.com?subject=$konu&body=$govde');
+      if (!await launchUrl(url)) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+                content: Text('Mail uygulaması açılamadı.'),
+                backgroundColor: Colors.redAccent),
+          );
+        }
+      }
+    } else {
+      final mesaj = 'Merhaba! 👋\n\n'
           'Lokatist uygulamasından "${paket.isim} Paket" (${paket.fiyat}${paket.periyot != null ? ' ${paket.periyot}' : ''}) almak istiyorum.\n\n'
           'Ödeme bilgilerini (IBAN vb.) paylaşabilir misiniz?';
-    final url = Uri.parse(
-        'https://wa.me/$_wpNumara?text=${Uri.encodeComponent(mesaj)}');
-    if (!await launchUrl(url, mode: LaunchMode.externalApplication)) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-              content: Text('WhatsApp açılamadı.'),
-              backgroundColor: Colors.redAccent),
-        );
+      final url = Uri.parse('https://wa.me/$_wpNumara?text=${Uri.encodeComponent(mesaj)}');
+      if (!await launchUrl(url, mode: LaunchMode.externalApplication)) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+                content: Text('WhatsApp açılamadı.'),
+                backgroundColor: Colors.redAccent),
+          );
+        }
       }
     }
   }
@@ -403,11 +415,15 @@ class _BusinessPackagePageState extends State<BusinessPackagePage> {
         width: double.infinity,
         height: 56,
         child: ElevatedButton.icon(
-          onPressed: _wpAc,
-          icon: const Icon(Icons.chat_rounded, color: Colors.white, size: 22),
+          onPressed: _iletisimAc,
+          icon: Icon(
+            Platform.isIOS ? Icons.email_rounded : Icons.chat_rounded,
+            color: Colors.white,
+            size: 22,
+          ),
           label: Text(
             Platform.isIOS
-                ? 'Hemen Yükselt  —  ${paket.isim}'
+                ? 'Bilgi Al  —  ${paket.isim}'
                 : 'Hemen Yükselt  —  ${paket.isim} ${paket.fiyat}',
             style: const TextStyle(
                 color: Colors.white,
