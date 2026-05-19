@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:provider/provider.dart';
@@ -122,30 +123,30 @@ class YanMenu extends StatelessWidget {
               },
             ),
             const Spacer(),
-            // LOKATİST Business
-            Container(
-              margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-              decoration: BoxDecoration(
-                gradient: const LinearGradient(
-                  colors: [Color(0xFF003d82), Color(0xFF0073e6)],
-                  begin: Alignment.centerLeft,
-                  end: Alignment.centerRight,
+            if (!Platform.isIOS)
+              Container(
+                margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                decoration: BoxDecoration(
+                  gradient: const LinearGradient(
+                    colors: [Color(0xFF003d82), Color(0xFF0073e6)],
+                    begin: Alignment.centerLeft,
+                    end: Alignment.centerRight,
+                  ),
+                  borderRadius: BorderRadius.circular(14),
                 ),
-                borderRadius: BorderRadius.circular(14),
-              ),
-              child: ListTile(
-                leading: const Icon(Icons.business_center, color: Colors.white, size: 26),
-                title: const Text(
-                  'LOKATİST Business',
-                  style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold, color: Colors.white),
+                child: ListTile(
+                  leading: const Icon(Icons.business_center, color: Colors.white, size: 26),
+                  title: const Text(
+                    'LOKATİST Business',
+                    style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold, color: Colors.white),
+                  ),
+                  trailing: const Icon(Icons.arrow_forward_ios, color: Colors.white54, size: 14),
+                  onTap: () {
+                    Navigator.pop(context);
+                    Navigator.push(context, MaterialPageRoute(builder: (_) => const BusinessPackagePage()));
+                  },
                 ),
-                trailing: const Icon(Icons.arrow_forward_ios, color: Colors.white54, size: 14),
-                onTap: () {
-                  Navigator.pop(context);
-                  Navigator.push(context, MaterialPageRoute(builder: (_) => const BusinessPackagePage()));
-                },
               ),
-            ),
             ListTile(
               leading:
                   const Icon(Icons.settings, color: Colors.grey, size: 30),
